@@ -1,46 +1,29 @@
 import React from 'react'
 import { CSSTransitionGroup } from 'react-transition-group'
-import { BrowserRouter as Router, Route, Link, Redirect } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
 
-/* you'll need this CSS somewhere
-.fade-enter {
-  opacity: 0;
-  z-index: 1;
-}
+const FROM_LEFT = 'fromLeft'
+const FROM_RIGHT = 'fromRight'
 
-.fade-enter.fade-enter-active {
-  opacity: 1;
-  transition: opacity 250ms ease-in;
-}
-*/
-
-const AnimationExample = () => (
+const BasicExample = () => (
   <Router>
     <Route
       render={({ location }) => (
         <div style={styles.fill}>
-          <Route exact path="/" render={() => <Redirect to="/10/90/50" />} />
-
-          <ul style={styles.nav}>
-            <NavLink to="/10/90/50">Red</NavLink>
-            <NavLink to="/120/100/40">Green</NavLink>
-            <NavLink to="/200/100/40">Blue</NavLink>
-            <NavLink to="/310/100/50">Pink</NavLink>
-          </ul>
-
           <div style={styles.content}>
             <CSSTransitionGroup
-              transitionName="reversePageSwap"
+              transitionName={(location.state && location.state.direction) || FROM_RIGHT}
               transitionEnterTimeout={1000}
               transitionLeaveTimeout={1000}
             >
-              {/* no different than other usage of
-                CSSTransitionGroup, just make
-                sure to pass `location` to `Route`
-                so it can match the old location
-                as it animates out
-            */}
-              <Route location={location} key={location.key} path="/:h/:s/:l" component={HSL} />
+              <Route location={location} key={`${location.key}-home`} exact path="/" component={Home} />
+              <Route
+                location={location}
+                key={`${location.key}-about-stuff`}
+                path="/about-stuff"
+                component={AboutStuff}
+              />
+              <Route location={location} key={`${location.key}-about`} path="/about" component={About} />
             </CSSTransitionGroup>
           </div>
         </div>
@@ -49,23 +32,54 @@ const AnimationExample = () => (
   </Router>
 )
 
-const NavLink = props => (
-  <li style={styles.navItem}>
-    <Link {...props} style={{ color: 'inherit' }} />
-  </li>
-)
-
-const HSL = ({ match: { params } }) => (
+const Home = () => (
   <div
     style={{
       ...styles.fill,
       ...styles.hsl,
-      background: `hsl(${params.h}, ${params.s}%, ${params.l}%)`,
+      backgroundColor: 'red',
+      color: 'white',
     }}
   >
-    hsl({params.h}, {params.s}%, {params.l}%)
+    <h2>Home</h2>
+    <Link to={{ pathname: '/about', state: { direction: FROM_RIGHT } }}>About</Link>
   </div>
 )
+
+const About = () => (
+  <div
+    style={{
+      ...styles.fill,
+      ...styles.hsl,
+      backgroundColor: 'blue',
+      color: 'white',
+    }}
+  >
+    <h2>About</h2>
+    <div>
+      <Link to={{ pathname: '/', state: { direction: FROM_LEFT } }}>Back to home</Link>
+    </div>
+    <div>
+      <Link to={'/about-stuff'}>About stuff</Link>
+    </div>
+  </div>
+)
+
+const AboutStuff = () => (
+  <div
+    style={{
+      ...styles.fill,
+      ...styles.hsl,
+      backgroundColor: 'green',
+      color: 'white',
+    }}
+  >
+    <h2>About stuff</h2>
+    <Link to={{ pathname: '/about', state: { direction: FROM_LEFT } }}>Back to about</Link>
+  </div>
+)
+
+export default BasicExample
 
 const styles = {}
 
@@ -102,9 +116,6 @@ styles.navItem = {
 
 styles.hsl = {
   ...styles.fill,
-  color: 'white',
   paddingTop: '20px',
   fontSize: '30px',
 }
-
-export default AnimationExample
