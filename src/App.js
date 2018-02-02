@@ -1,9 +1,17 @@
 import React from 'react'
 import { CSSTransitionGroup } from 'react-transition-group'
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Link as RouterLink } from 'react-router-dom'
 
 const FROM_LEFT = 'fromLeft'
 const FROM_RIGHT = 'fromRight'
+const BACK_BUTTON_DIRECTION = FROM_RIGHT
+
+const Link = props => {
+  const { to } = props
+  const toWithDefaultDirection =
+    to && to === Object(to) ? { ...to, state: { ...to.state, direction: to.state.direction || FROM_RIGHT } } : to
+  return <RouterLink {...props} to={toWithDefaultDirection} />
+}
 
 const BasicExample = () => (
   <Router>
@@ -12,7 +20,7 @@ const BasicExample = () => (
         <div style={styles.fill}>
           <div style={styles.content}>
             <CSSTransitionGroup
-              transitionName={(location.state && location.state.direction) || FROM_RIGHT}
+              transitionName={(location.state && location.state.direction) || BACK_BUTTON_DIRECTION}
               transitionEnterTimeout={1000}
               transitionLeaveTimeout={1000}
             >
@@ -42,7 +50,7 @@ const Home = () => (
     }}
   >
     <h2>Home</h2>
-    <Link to={{ pathname: '/about', state: { direction: FROM_RIGHT } }}>About</Link>
+    <Link to="/about">About</Link>
   </div>
 )
 
